@@ -2,9 +2,17 @@ const Employee = require("./lib/Employee");
 const Manager = require("./lib/Manager");
 const Engineer = require("./lib/Engineer");
 const Intern = require("./lib/Intern");
+const managerQuestions = require("./lib/managerquestions");
+const engineerQuestions = require("./lib/engineerquestions");
+const internQuestions = require("./lib/internquestions");
 const inquirer = require("inquirer");
 const path = require("path");
 const fs = require("fs");
+
+let numberOfEngineers;
+let numberOfInterns;
+let managerAnswers;
+let engineerAnswers;
 
 //set up output dir path
 const OUTPUT_DIR = path.resolve(__dirname, "output");
@@ -17,41 +25,82 @@ const render = require("./lib/htmlRenderer");
 // Write code to use inquirer to gather information about the development team members,
 // and to create objects for each team member (using the correct classes as blueprints!)
 
-const questions = () =>
-    inquirer.prompt([
-        {
-            type: 'input',
-            name: 'name',
-            message: 'What is your name?',
-        },
-        {
-            type: 'number',
-            name: 'id',
-            message: 'What is your ID?',
-        },
-        {
-            type: 'input',
-            name: 'email',
-            message: 'What is your email',
-        },
-     
-    ])
-
-
-questions()
+inquirer.prompt(managerQuestions)
     .then((answers) => {
-        const employee = new Employee(answers.name, answers.id, answers.email);
-        employee instanceof Employee;
+        managerAnswers = answers;
 
-        //console.log(employee);
-        console.log(employee.getName());
-        console.log(employee.getId());
-        console.log(employee.getEmail());
-        console.log(employee.getRole());
-        
+        const questions = [];
+        numberOfEngineers = answers.numberOfEngineers
+        numberOfInterns = answers.numberOfInterns;
+        for (let i = 1; i <= numberOfEngineers; i++) {
+            engineerQuestions.forEach((question) => {
+                //add 
+                const q = {
+                    ...question,
+                    message: question.message + `(#${i})`,
+                    name: question.name + i
+                };
+
+                questions.push(q);
+            });
+        }
+        //generate prompt for the number of engineers manager added
+        return inquirer.prompt(questions);
+    })
+    .then((answers) => {
+        //chain to be able to use in intern section below
+        engineerAnswers = answers;
+        const questions = [];
+        for (let i = 1; i <= numberOfInterns; i++) {
+            internQuestions.forEach((question) => {
+                const q = {
+                    ...question,
+                    message: question.message + `(#${i})`,
+                    name: question.name + i
+                };
+
+                questions.push(q);
+            });
+        }
+        //prompt intern questions once code above is executed
+        return inquirer.prompt(questions);
+    })
+    .then((answers) => {
+        const manager = new Manager(managerAnswers.managerName, managerAnswers.managerId, managerAnswers.managerEmail, managerAnswers.managerNumber);
+
+        console.log(`Manager Name: ${manager.getName()}`);
+        console.log(`Manager ID: ${manager.getId()}`);
+        console.log(`Manager Email: ${manager.getEmail()}`);
+        console.log(`Manager Office Number: ${manager.getOfficeNumber()}`);
+        console.log(`Manager Role: ${manager.getRole()}`);
+
+        for (let i = 1; i <= numberOfEngineers; i++) {
+            const engineer = new Engineer(engineerAnswers[`engineerName${i}`], engineerAnswers[`engineerId${i}`], engineerAnswers[`engineerEmail${i}`], engineerAnswers[`engineerGithub${i}`]);
+
+            console.log(`Engineer Name: ${engineer.getName()}`);
+            console.log(`Engineer ID: ${engineer.getId()}`);
+            console.log(`Engineer Email: ${engineer.getEmail()}`);
+            console.log(`Engineer Github: ${engineer.getGithub()}`);
+            console.log(`Engineer Role: ${engineer.getRole()}`);
+        }
+
+        for (let i = 1; i <= numberOfInterns; i++) {
+            const intern = new Intern(answers[`internName${i}`], answers[`internId${i}`], answers[`internEmail${i}`], answers[`internSchool{i}`]);
+
+            console.log(`Intern Name: ${intern.getName()}`);
+            console.log(`Intern ID: ${intern.getId()}`);
+            console.log(`Intern Email: ${intern.getEmail()}`);
+            console.log(`Intern School: ${intern.getSchool()}`);
+            console.log(`Intern Role: ${intern.getRole()}`);
+        }
     })
     .catch((err) => console.error(err));
 
+
+    //role question
+    //.then switch statement to present set of questions for each role
+    ///.then r4est of the app funcitonality
+    //store role in global variable to be accessible to the second promise
 
 // After the user has input all employees desired, call the `render` function (required
 // above) and pass in an array containing all employee objects; the `render` function will
