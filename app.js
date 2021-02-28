@@ -22,9 +22,6 @@ const outputPath = path.join(OUTPUT_DIR, "team.html");
 const render = require("./lib/htmlRenderer");
 
 
-// Write code to use inquirer to gather information about the development team members,
-// and to create objects for each team member (using the correct classes as blueprints!)
-
 inquirer.prompt(managerQuestions)
     .then((answers) => {
         managerAnswers = answers;
@@ -34,7 +31,7 @@ inquirer.prompt(managerQuestions)
         numberOfInterns = answers.numberOfInterns;
         for (let i = 1; i <= numberOfEngineers; i++) {
             engineerQuestions.forEach((question) => {
-                //add 
+                //add questions to each additional entry 
                 const q = {
                     ...question,
                     message: question.message + `(#${i})`,
@@ -44,7 +41,7 @@ inquirer.prompt(managerQuestions)
                 questions.push(q);
             });
         }
-        //generate prompt for the number of engineers manager added
+        //prompt engineer questions once code above is executed
         return inquirer.prompt(questions);
     })
     .then((answers) => {
@@ -66,7 +63,10 @@ inquirer.prompt(managerQuestions)
         return inquirer.prompt(questions);
     })
     .then((answers) => {
+        const employees = [];
         const manager = new Manager(managerAnswers.managerName, managerAnswers.managerId, managerAnswers.managerEmail, managerAnswers.managerNumber);
+
+        employees.push(manager);
 
         console.log(`Manager Name: ${manager.getName()}`);
         console.log(`Manager ID: ${manager.getId()}`);
@@ -82,25 +82,32 @@ inquirer.prompt(managerQuestions)
             console.log(`Engineer Email: ${engineer.getEmail()}`);
             console.log(`Engineer Github: ${engineer.getGithub()}`);
             console.log(`Engineer Role: ${engineer.getRole()}`);
+
+            employees.push(engineer);
         }
 
         for (let i = 1; i <= numberOfInterns; i++) {
-            const intern = new Intern(answers[`internName${i}`], answers[`internId${i}`], answers[`internEmail${i}`], answers[`internSchool{i}`]);
+            const intern = new Intern(answers[`internName${i}`], answers[`internId${i}`], answers[`internEmail${i}`], answers[`internSchool${i}`]);
 
             console.log(`Intern Name: ${intern.getName()}`);
             console.log(`Intern ID: ${intern.getId()}`);
             console.log(`Intern Email: ${intern.getEmail()}`);
             console.log(`Intern School: ${intern.getSchool()}`);
             console.log(`Intern Role: ${intern.getRole()}`);
+
+            employees.push(intern);
         }
+
+        fs.writeFile('output/index.html', render(employees), (err) => {
+            // throws an error, you could also catch it here
+            if (err) throw err;
+            // success case, the file was saved
+            console.log('File saved!');
+        });
     })
     .catch((err) => console.error(err));
 
 
-    //role question
-    //.then switch statement to present set of questions for each role
-    ///.then r4est of the app funcitonality
-    //store role in global variable to be accessible to the second promise
 
 // After the user has input all employees desired, call the `render` function (required
 // above) and pass in an array containing all employee objects; the `render` function will
