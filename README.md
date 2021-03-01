@@ -9,6 +9,8 @@ The website was built using HTML, CSS and Javascript, and several Node packages 
 
 Single responsive page containing the generated template.
 
+Link to demo (you might need to be logged into Gmail to view) https://drive.google.com/drive/folders/15rlk2ZKfxwTe5SgE6vr7yJuamvaqpn22 
+
 ![Team Profile Generator demo](demo.png)
 
 ## Contributing
